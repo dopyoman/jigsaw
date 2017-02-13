@@ -1,6 +1,6 @@
 {
-    "name": "tightenco/jigsaw",
-    "description": "Simple static sites with Laravel's Blade.",
+    "name": "trimmer/jigsaw",
+    "description": "A fork of Adam Wathan's jigsaw static site builder repurposed to build bash and conf files",
     "keywords": ["blade", "laravel", "static", "site", "generator"],
     "license": "MIT",
     "authors": [

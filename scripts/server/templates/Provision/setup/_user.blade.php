@@ -42,3 +42,9 @@ ssh-keygen -f /home/$sudo_user/.ssh/id_rsa -t rsa -N ''
 
 ssh-keyscan -H github.com >> /home/$sudo_user/.ssh/known_hosts
 ssh-keyscan -H bitbucket.org >> /home/$sudo_user/.ssh/known_hosts
+
+# Setup Site Directory Permissions
+
+chown -R $sudo_user:$sudo_user /home/$sudo_user
+chmod -R 755 /home/$sudo_user
+chmod 700 /home/$sudo_user/.ssh/id_rsa

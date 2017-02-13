@@ -15,12 +15,10 @@ apt-add-repository ppa:ondrej/php -y
 curl -s https://packagecloud.io/gpg.key | apt-key add -
 echo "deb http://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list
 
-@include('Provision._mariaDBRepositories')
+@include('Provision.DB._mariaDB')
 
-# Setup Postgres 9.4 Repositories
+@include('Provision.DB._postgres')
 
-# wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-# sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" >> /etc/apt/sources.list.d/postgresql.list'
 
 # Update Package Lists
 

@@ -61,12 +61,9 @@ apt-get update
 
 apt-get install -y --force-yes build-essential curl fail2ban gcc git libmcrypt4 libpcre3-dev \
 make python2.7 python-pip supervisor ufw unattended-upgrades unzip whois zsh
-
 # Install Python Httpie
 
 pip install httpie
-
-
 # Disable Password Authentication Over SSH
 
 sed -i "/PasswordAuthentication yes/d" /etc/ssh/sshd_config
@@ -79,26 +76,22 @@ echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config
 ssh-keygen -A
 service ssh restart
 
+# Create The Root SSH Directory If Necessary
+
+if [ ! -d /root/.ssh ]
+then
+mkdir -p /root/.ssh
+touch /root/.ssh/authorized_keys
+fi
 # Set The Hostname If Necessary
 
 
 echo "$host_name" > /etc/hostname
 sed -i 's/127\.0\.0\.1.*localhost/127.0.0.1	$host_name localhost/' /etc/hosts
 hostname $host_name
-
-
 # Set The Timezone
 
 ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
-
-# Create The Root SSH Directory If Necessary
-
-if [ ! -d /root/.ssh ]
-then
-	mkdir -p /root/.ssh
-	touch /root/.ssh/authorized_keys
-fi
-
 # Setup Forge User
 
 useradd $sudo_user
@@ -143,25 +136,12 @@ ssh-keygen -f /home/$sudo_user/.ssh/id_rsa -t rsa -N ''
 
 ssh-keyscan -H github.com >> /home/$sudo_user/.ssh/known_hosts
 ssh-keyscan -H bitbucket.org >> /home/$sudo_user/.ssh/known_hosts
-# Configure Git Settings
 
-git config --global user.name "$git_name"
-git config --global user.email "$git_email"
+# Setup Site Directory Permissions
 
-# Add The Reconnect Script Into Forge Directory
-
-cat > /home/$sudo_user/.$sudo_user/reconnect << EOF
-#!/usr/bin/env bash
-
-echo "# Laravel $sudo_user" | tee -a /home/forge/.ssh/authorized_keys > /dev/null
-echo \$1 | tee -a /home/forge/.ssh/authorized_keys > /dev/null
-
-echo "# Laravel $sudo_user" | tee -a /root/.ssh/authorized_keys > /dev/null
-echo \$1 | tee -a /root/.ssh/authorized_keys > /dev/null
-
-echo "Keys Added!"
-EOF
-
+chown -R $sudo_user:$sudo_user /home/$sudo_user
+chmod -R 755 /home/$sudo_user
+chmod 700 /home/$sudo_user/.ssh/id_rsa
 # Add The Environment Variables Scripts Into Forge Directory
 
 cat > /home/$sudo_user/.$sudo_user/add-variable.php << EOF
@@ -212,38 +192,29 @@ file_put_contents($path, '<?php return '.var_export($env, true).';');
 
 
 EOF
-# Setup Site Directory Permissions
-
-chown -R $sudo_user:$sudo_user /home/$sudo_user
-chmod -R 755 /home/$sudo_user
-chmod 700 /home/$sudo_user/.ssh/id_rsa
-
 # Setup UFW Firewall
 
 ufw allow 22
 ufw allow 80
 ufw allow 443
 ufw --force enable
-
 # Allow FPM Restart
 
 echo "forge ALL=NOPASSWD: /usr/sbin/service php7.0-fpm reload" > /etc/sudoers.d/php-fpm
 echo "forge ALL=NOPASSWD: /usr/sbin/service php5-fpm reload" >> /etc/sudoers.d/php-fpm
 
-			# Install Base PHP Packages
+# Install Base PHP Packages
 
-	apt-get install -y --force-yes php7.1-cli php7.1-dev \
-	php7.1-pgsql php7.1-sqlite3 php7.1-gd \
-	php7.1-curl php7.1-memcached \
-	php7.1-imap php7.1-mysql php7.1-mbstring \
-	php7.1-xml php7.1-zip php7.1-bcmath php7.1-soap \
-	php7.1-intl php7.1-readline
-
+apt-get install -y --force-yes php7.1-cli php7.1-dev \
+php7.1-pgsql php7.1-sqlite3 php7.1-gd \
+php7.1-curl php7.1-memcached \
+php7.1-imap php7.1-mysql php7.1-mbstring \
+php7.1-xml php7.1-zip php7.1-bcmath php7.1-soap \
+php7.1-intl php7.1-readline
 # Install Composer Package Manager
 
 curl -sS https://getcomposer.org/installer | php
 mv composer.phar /usr/local/bin/composer
-
 # Misc. PHP CLI Configuration
 
 sudo sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.0/cli/php.ini
@@ -255,9 +226,6 @@ sudo sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.0/cli/php.ini
 
 chmod 733 /var/lib/php/sessions
 chmod +t /var/lib/php/sessions
-
-
-	#
 # REQUIRES:
 #       - server (the forge server instance)
 #		- site_name (the name of the site folder)
@@ -265,13 +233,11 @@ chmod +t /var/lib/php/sessions
 
 # Install Nginx & PHP-FPM
 
-	apt-get install -y --force-yes nginx php7.1-fpm
+apt-get install -y --force-yes nginx php7.1-fpm
 
 # Generate dhparam File
 
 openssl dhparam -out /etc/nginx/dhparams.pem 2048
-
-
 # Copy fastcgi_params to Nginx because they broke it on the PPA
 
 cat > /etc/nginx/fastcgi_params << EOF
@@ -296,12 +262,21 @@ fastcgi_param	HTTPS			\$https if_not_empty;
 fastcgi_param	REDIRECT_STATUS		200;
 EOF
 
-
 # Disable The Default Nginx Site
 
 rm /etc/nginx/sites-enabled/default
 rm /etc/nginx/sites-available/default
 service nginx restart
+
+# Install A Catch All Server
+
+cat > /etc/nginx/sites-available/catch-all << EOF
+server {
+return 404;
+}
+EOF
+
+ln -s /etc/nginx/sites-available/catch-all /etc/nginx/sites-enabled/catch-all
 
 # Tweak Some PHP-FPM Settings
 
@@ -319,9 +294,9 @@ sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.0/fpm/php.ini
 
 sed -i "s/\;session.save_path = .*/session.save_path = \"\/var\/lib\/php5\/sessions\"/" /etc/php/7.0/fpm/php.ini
 
-	sed -i "s/php5\/sessions/php\/sessions/" /etc/php/7.0/fpm/php.ini
+sed -i "s/php5\/sessions/php\/sessions/" /etc/php/7.0/fpm/php.ini
 
-# Configure Nginx & PHP-FPM To Run As Forge
+# Configure Nginx & PHP-FPM To Run As User
 
 sed -i "s/user www-data;/user ${sudo_user};/" /etc/nginx/nginx.conf
 sed -i "s/# server_names_hash_bucket_size.*/server_names_hash_bucket_size 64;/" /etc/nginx/nginx.conf
@@ -342,42 +317,21 @@ sed -i "s/;request_terminate_timeout.*/request_terminate_timeout = 60/" /etc/php
 
 sed -i "s/worker_processes.*/worker_processes auto;/" /etc/nginx/nginx.conf
 sed -i "s/# multi_accept.*/multi_accept on;/" /etc/nginx/nginx.conf
-
-# Install A Catch All Server
-
-cat > /etc/nginx/sites-available/catch-all << EOF
-server {
-	return 404;
-}
-EOF
-
-ln -s /etc/nginx/sites-available/catch-all /etc/nginx/sites-enabled/catch-all
-
-# Restart Nginx & PHP-FPM Services
-
-# Restart Nginx & PHP-FPM Services
+#Restart PHP-FPM Services
 
 if [ ! -z "\$(ps aux | grep php-fpm | grep -v grep)" ]
 then
-	service php7.0-fpm restart
+service php7.1-fpm restart
 fi
+# Restart Nginx
 
 service nginx restart
 service nginx reload
-
-# Add Forge User To www-data Group
+# Add User To www-data Group
 
 usermod -a -G www-data ${sudo_user}
 id ${sudo_user}
 groups ${sudo_user}
-
-
-#
-# REQUIRES:
-#       - server (the forge server instance)
-#
-
-# Only Install PHP Extensions When Not On HHVM
 
 
 curl --silent --location https://deb.nodesource.com/setup_6.x | bash -
@@ -389,7 +343,6 @@ sudo apt-get install -y --force-yes nodejs
 npm install -g pm2
 npm install -g gulp
 npm install -g yarn
-
     #
 # REQUIRES:
 #       - server (the forge server instance)
@@ -410,7 +363,7 @@ apt-get install -y mariadb-server
 
 # Configure Password Expiration
 
- echo "default_password_lifetime = 0" >> /etc/mysql/my.cnf
+echo "default_password_lifetime = 0" >> /etc/mysql/my.cnf
 
 # Configure Access Permissions For Root & Forge Users
 
@@ -433,8 +386,6 @@ echo "character-set-server = utf8" >> /etc/mysql/my.cnf
 # Create The Initial Database If Specified
 
 mysql --user="$mysql_username" --password="$mysql_password" -e "CREATE DATABASE $mysql_database;"
-
-
 #
 # REQUIRES:
 #		- server (the forge server instance)
@@ -456,7 +407,6 @@ service postgresql restart
 
 sudo -u postgres /usr/bin/createdb --echo --owner=forge forge
 
-
 # Install & Configure Redis Server
 
 apt-get install -y redis-server
@@ -473,10 +423,13 @@ apt-get install -y --force-yes beanstalkd
 sed -i "s/BEANSTALKD_LISTEN_ADDR.*/BEANSTALKD_LISTEN_ADDR=0.0.0.0/" /etc/default/beanstalkd
 sed -i "s/#START=yes/START=yes/" /etc/default/beanstalkd
 /etc/init.d/beanstalkd start
-
 apt-get install -y blackfire-agent blackfire-php
-service php7.0-fpm restart
+#Restart PHP-FPM Services
 
+if [ ! -z "\$(ps aux | grep php-fpm | grep -v grep)" ]
+then
+service php7.1-fpm restart
+fi
 # Install & Configure MailHog
 
 # Download binary from github
@@ -487,13 +440,13 @@ chmod +x /usr/local/bin/mailhog
 
 # Make it start on reboot
 sudo tee /etc/systemd/system/mailhog.service <<EOL
-[Unit]
-Description=Mailhog
-After=network.target
+        [Unit]
+        Description=Mailhog
+        After=network.target
 
-[Service]
-User=vagrant
-ExecStart=/usr/bin/env /usr/local/bin/mailhog > /dev/null 2>&1 &
+        [Service]
+        User=vagrant
+        ExecStart=/usr/bin/env /usr/local/bin/mailhog > /dev/null 2>&1 &
 
 [Install]
 WantedBy=multi-user.target

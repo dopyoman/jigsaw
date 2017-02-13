@@ -1,7 +1,8 @@
-<?php echo "
+
 # Add The Environment Variables Scripts Into Forge Directory
 
 cat > /home/$sudo_user/.$sudo_user/add-variable.php << EOF
+<?php echo "
 <?php
 
 // Get the script input...
@@ -23,9 +24,11 @@ if ( ! file_exists(\$path)) {
 file_put_contents(\$path, '<?php return '.var_export(\$env, true).';');
 
 
-EOF
+EOF"
+?>
 
 cat > /home/forge/.forge/remove-variable.php << EOF
+<?php echo "
 <?php
 
 // Get the script input...
