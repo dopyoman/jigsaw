@@ -13,8 +13,9 @@ class DataLoader
         $this->collectionDataLoader = $collectionDataLoader;
     }
 
-    public function load($source, $env)
+    public function load($source)
     {
+        $env = 'local';
         $configSettings = ConfigSettings::build($this->loadConfigData($env));
         $collectionData = $this->loadCollectionData($source, $configSettings);
 
@@ -31,6 +32,7 @@ class DataLoader
         } else {
             $environmentConfig = [];
         }
+
 
         return $this->makeIterableObject(array_merge($this->config, $environmentConfig));
     }

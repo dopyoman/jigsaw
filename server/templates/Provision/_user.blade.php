@@ -1,0 +1,50 @@
+# Setup Forge User
+
+useradd $sudo_user
+mkdir -p /home/$sudo_user/.ssh
+mkdir -p /home/$sudo_user/.$sudo_user
+adduser $sudo_user sudo
+
+# Setup Bash For Forge User
+
+chsh -s /bin/bash $sudo_user
+cp /root/.profile /home/$sudo_user/.profile
+cp /root/.bashrc /home/$sudo_user/.bashrc
+
+# Set The Sudo Password For Forge
+
+PASSWORD=$(mkpasswd ${sudo_password})
+usermod --password $PASSWORD $sudo_user
+
+# Build Formatted Keys & Copy Keys To Forge
+
+
+cat > /root/.ssh/authorized_keys << EOF
+# Laravel Forge
+ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAmC5ETjblAcy8JiQ7X0WzwxwCgJYin5vQAvi7EMmLm7KPpjOtXDjo7QAxFD+ZY48c82BOt3DTrhGSkJeL1/yMFXLvh7OkvJ/gVP19+Z3vUHmg4tHnuM6bcrKCUu24DUwpPz87MYQI31+c6Xht2lcDGCQGKk750Rlj10tK5Tfjn9ihipM1rB5v5KJx3QNCle0eGpWLCvD1CFcuwxG
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKdk75hfkvztYFmyEGcBXQ3LeTd147EenM4i34m7rmS+is8TJXr9Ix461Q1rv6EXZduC36omgHAbgTfYv7293I48px9ahkEviL2hynBQAyyfO2wde4EbV6Zzzc82Z5x2TOAyeKYNHBGgyApMOZewcw6pm+lrw93AS1x7mTO0xlx8uQAa8r/kznzc32xdxgdGka1kgClYLWFP+r1m7RHE3Cf5HM2IgwKyMmFiDdOvXptlf0vul300djtQIduo5AqRjLZGjTYc0lg1XFgHkcSd5SlzHLpH6+FZPPMNnheyYBpi6CMZ9dOQQNYtgGxotp5I0z3hF0z6tRw5l6fWaC4m1b jonathan@jonathan-ThinkCentre-M900
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCuio0Y1bznYj+RfFGw7ivp+JFfuv43SfRT9VR+mE8HtWiH7/qGflDXEBmgWNLNC1Cbh3K3zO/42AAKcJyAzWAYn2Idsg5YC4tId20hWT5Pt9mtUkWCsiXWNwXQygeOq16dHkNpLnq+73xuEkvX8+oFDEO0HIgeKQz65tMvtXo0+NaMj1ku/9U5C+QrzBFQQ8/EIrRKs1JFcbe0XoOT4MGksrWMIyZCju1mXK8r+eCaXdOqKIVEtEi3LkYUYngVJpx4oRKt0zgJQrchAJxugBaEb270CA6RA8p5mKlWAS5NwFEMOaiua0yJwhHlBzmhn2Cx+MKxWNUkQCTxoX5+7bff jsarry@gmail.com
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDhWszPnIdOEXdjvb6Q2JuBz9K1C8RN86yozG4y5lU5P/YW+0WA6DCzJtqz4sjmr+H3yrNIUM04Rsy1+352D/6I0H8vO+GdWESg3Er1388lU864JAZ7z+GzWKZTlYqQ6yFdkS/JE1C47PxaXEwvcybdyawweZV76LywdxSBQsztKGEvaZ1NW+8Q7Pode5oL9PcYvI4jUjstKMvwdwE8qd7NpAAXU9aSe8dxhHA2dJsdF7eH8lb8/BOK0kWTg5tMMdGgN12rKJIUaSz1xJZPaqFNhUORme/DVJwpY625UsPMTJ9GhCcmeKsj2fD2/wYDoj/vNw2NAn/dUFoliLcVnLXP Euler@DESKTOP-4D482E6
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCoH09biKb9EEAnGOJX5rAlKL1saWy5Bkjp+6aJmpSzjzC7bg6JRyF0pArs0yTPdl/69ELpoVX1yJBk2yD4dtAwq2rK0I1TyBLwQ4i6iwfGzv5FPo252pMWHRKAvdpddHzOWC9XWImQQt1ADqXEQWEtZdh0ANo7oQRT/rv8no8KW76OfIGyU2jhdnXEAU3jUJHNeIj7CNp2mtFx4KHIlg/a+mS2yRl9qoQZFEnbpQPnG8sYhgi8fzJqU+WPh9zC0pKfWvjNg96aFMzSadye9vZ7QgCm6Ah3wzt5Rwl1frNtntFgWHeiIsmVVpCGOVGOSBJj1/04qXLO+TBizo7tslmP Descartes@DESKTOP-P9GMTTV
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC54VKU3w358hTO/9OxK8aXKoQgCPlJ+xFi2fqLfbJYH1XHe7hOYneV4F6uYBaUIk+2aqy90pHXl0eE7Ehoah1biy1l5ovXSbRkmzAAKghcxiicubgtCxCSrm2uA7dwGRTI3Bcu8ay3MsgASZhE8H/GGN+qetiybQfkJeDnx4mRTKTPHdNR5UEyrxTp1dzmtWOVoo3Dk25XREPjAwcz8Ho5Uw4Bf/wGaDCs1qSB1q7wWAXgM4gBDpx8Y8jYBlCyzR1GQzLi/QKlliZsyUNVBWMwhY56wD1WLV7D6HmaRZN+6VQ0QY3Wi0zVoisILVnMFkJZdrIGvoCdDQ7hvriaxKxQsaLkAfCYeXeXqiRg24+oYNLJn+E2xSWMKFzbIpCEQSAhybmApGQ2o9m2abrx7c/ZmHVMpJnBm1FFPK9Rbi2FyizNZBT6BWECfKqWwkzshzDZb+sL87WpQvoNwV9c/EpdUaan9BO5UAwHbvkWO8kTOJDhHJxQBXWl8DAPB4fnBlvJGbirBDtxwWJ/paclri9R0ezREMdzqPW/OZs5fW2SMFqWeAMl3/lakt2JyvY5YVWP9UkJThGvP6L0uYH03Dkk6s8UdgH+Dht7hyUXZPDT4jNYxDNpFmJnNgyQh2CvheIuPXma35/7aD0lQtWPIt3Qsl7wlN71u5sze5zmfZlSeQ== jsarry@gmail.com
+ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAp58C/g42A4MrAtIdFxg2s+0AU94zSa/TVN/bOOO/Xer2ognSczaPEWgZxXsad3zHHNltzAIMx1FzNBGK4seQH5sirCdJUhVpuHICUE8qzapEEJseSI+vyvJHJT3TVOfu4IXm4B0EJGzxiaEaBdmKFwPimkeldn+JFbSAJlU5yeEcc/lSw7G4rAW1AjI8ZieLEU3/3JiqEDnHpRt/fCM5/4DuEmCm5HmHOnGw16u+Ws0sbkyA8inIX8escM/gvUlR12z2yZpaq8U36ZWtch7LRff/ffgOJjh20M4ZdnfMV4NfNrEUWAgbEyUpXDrmW8P9LYF3aYqR6XBRubJaHjcfjw== rsa-key-20150531
+
+EOF
+
+
+cp /root/.ssh/authorized_keys /home/$sudo_user/.ssh/authorized_keys
+
+# Create The Server SSH Key
+
+ssh-keygen -f /home/$sudo_user/.ssh/id_rsa -t rsa -N ''
+
+# Copy Github And Bitbucket Public Keys Into Known Hosts File
+
+ssh-keyscan -H github.com >> /home/$sudo_user/.ssh/known_hosts
+ssh-keyscan -H bitbucket.org >> /home/$sudo_user/.ssh/known_hosts
+
+# Setup Site Directory Permissions
+
+chown -R $sudo_user:$sudo_user /home/$sudo_user
+chmod -R 755 /home/$sudo_user
+chmod 700 /home/$sudo_user/.ssh/id_rsa

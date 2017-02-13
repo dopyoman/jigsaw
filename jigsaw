@@ -45,14 +45,14 @@ if (file_exists(__DIR__.'/vendor/autoload.php')) {
     require __DIR__.'/../../autoload.php';
 }
 
-$cachePath = getcwd() . '/_tmp';
-$buildPath = getcwd() . '/build';
-$sourcePath = getcwd() . '/source';
-$bootstrapFile = getcwd() . '/bootstrap.php';
+$cachePath = getcwd() . '/server/_tmp';
+$buildPath = getcwd() . '/server/compiled';
+$sourcePath = getcwd() . '/server/templates';
+$bootstrapFile = getcwd() . '/server/bootstrap.php';
 
 $container = new Container;
 
-$config = include getcwd() . '/config.php';
+$config = include getcwd() . '/server/config.php';
 
 if (! file_exists(getcwd() . '/collections.php')) {
     $collectionSettings = [];

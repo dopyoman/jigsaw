@@ -11,9 +11,9 @@ class Jigsaw
         $this->siteBuilder = $siteBuilder;
     }
 
-    public function build($source, $dest, $env)
+    public function build($source, $dest)
     {
-        $siteData = $this->dataLoader->load($source, $env);
+        $siteData = $this->dataLoader->load($source);
         $this->siteBuilder->build($source, $dest, $siteData);
     }
 }

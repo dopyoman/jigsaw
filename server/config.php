@@ -1,5 +1,6 @@
 <?php
 
 return [
+
     'production' => false,
 ];

@@ -37,12 +37,12 @@ class BladeHandler
 
     public function buildOutput($file, ViewData $viewData)
     {
+
         $path = $file->getRelativePath();
         $filename = $file->getFilenameWithoutExtension();
         $extension = strtolower($file->getExtension());
         $fullPathName = $file->getRealPath();
         $renderedBladeWithFrontMatter = $this->parseFrontMatter($file, $viewData);
-
         return collect([
             new OutputFile(
                 $path,

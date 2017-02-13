@@ -22,22 +22,12 @@ class BuildCommand extends Command
     protected function configure()
     {
         $this->setName('build')
-            ->setDescription('Build your site.')
-            ->addArgument('env', InputArgument::OPTIONAL, "What environment should we use to build?", 'local')
-            ->addOption('pretty', null, InputOption::VALUE_REQUIRED, "Should the site use pretty URLs?", 'true');
+            ->setDescription('Build your servers scripts and config files.');
     }
 
     protected function fire()
     {
-        $env = $this->input->getArgument('env');
-
-        $this->dest .= '_' . $env;
-
-        if ($this->input->getOption('pretty') === 'true') {
-            $this->app->instance('outputPathResolver', new PrettyOutputPathResolver);
-        }
-
-        $this->app->make(Jigsaw::class)->build($this->source, $this->dest, $env);
+        $this->app->make(Jigsaw::class)->build($this->source, $this->dest);
 
         $this->info('Site built successfully!');
     }
