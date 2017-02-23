@@ -27,7 +27,7 @@
         "mnapoli/silly": "^1.3"
     },
     "bin": [
-        "jigsaw"
+        "jigsaw-trimmer"
     ],
     "require-dev": {
         "phpunit/phpunit": "^5.1"
