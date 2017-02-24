@@ -52,7 +52,8 @@ $bootstrapFile = getcwd() . '/server/bootstrap.php';
 
 $container = new Container;
 
-$config = include getcwd() . '/server/config.php';
+$config = include getcwd() . '/server/templates/config.php';
+
 
 if (! file_exists(getcwd() . '/collections.php')) {
     $collectionSettings = [];
