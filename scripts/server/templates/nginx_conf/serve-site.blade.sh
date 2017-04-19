@@ -33,7 +33,7 @@ block="server {
     location = /robots.txt  { access_log off; log_not_found off; }
 
     access_log off;
-    error_log  /var/log/nginx/$1-error.log error;
+    error_log  /var/log/nginx/{{ $config->site_domain }}-error.log error;
 
     sendfile off;
 
@@ -58,9 +58,9 @@ block="server {
         deny all;
     }
 
-    #todo ssl
-    #ssl_certificate     /etc/nginx/ssl/$1.crt;
-    #ssl_certificate_key /etc/nginx/ssl/$1.key;
+{{--    todo ssl
+    ssl_certificate     /etc/nginx/ssl/$1.crt;
+    ssl_certificate_key /etc/nginx/ssl/$1.key;--}}
 }
 "
 
